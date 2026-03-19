@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media API Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --accent3: #f472b6;
+      --accent4: #fb923c;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --get: #6ee7b7;
+      --post: #818cf8;
+      --put: #fb923c;
+      --delete: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 50%, #0a0a0f 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 40px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(110,231,183,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: 20%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(129,140,248,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); border: 1px solid rgba(110,231,183,0.3);
+      padding: 6px 14px; border-radius: 20px;
+      background: rgba(110,231,183,0.05);
+      margin-bottom: 24px;
+    }
+    .hero-badge::before { content: '●'; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text; 
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .hero p {
+      color: var(--muted); font-size: 1.1rem; max-width: 600px;
+      margin-bottom: 32px; line-height: 1.7;
+    }
+    .stats {
+      display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .stat {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem; font-weight: 700; color: var(--accent);
+    }
+    .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    /* Layout */
+    .layout { display: flex; min-height: calc(100vh - 280px); }
+    /* Sidebar */
+    .sidebar {
+      width: 260px; min-width: 260px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: var(--surface);
+    }
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); padding: 8px 24px; margin-bottom: 4px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 24px; cursor: pointer;
+      transition: all 0.15s; text-decoration: none; color: var(--muted);
+      font-size: 0.9rem; border-left: 2px solid transparent;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(255,255,255,0.03); border-left-color: var(--border); }
+    .sidebar-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(110,231,183,0.05); }
+    .resource-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    /* Main */
+    .main { flex: 1; padding: 40px; max-width: 900px; }
+    /* Section */
+    .section { margin-bottom: 64px; }
+    .section-title {
+      font-size: 1.6rem; font-weight: 800;
+      margin-bottom: 8px; color: #fff;
+    }
+    .section-desc { color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+    /* Endpoint card */
+    .endpoint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .endpoint:hover { border-color: rgba(110,231,183,0.2); }
+    .endpoint-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; cursor: pointer;
+      user-select: none;
+    }
+    .method {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      padding: 5px 12px; border-radius: 6px; min-width: 68px;
+      text-align: center;
+    }
+    .method-get { background: rgba(110,231,183,0.12); color: var(--get); border: 1px solid rgba(110,231,183,0.25); }
+    .method-post { background: rgba(129,140,248,0.12); color: var(--post); border: 1px solid rgba(129,140,248,0.25); }
+    .method-put { background: rgba(251,146,60,0.12); color: var(--put); border: 1px solid rgba(251,146,60,0.25); }
+    .method-delete { background: rgba(248,113,113,0.12); color: var(--delete); border: 1px solid rgba(248,113,113,0.25); }
+    .endpoint-path {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem; color: var(--text); flex: 1;
+    }
+    .endpoint-desc { font-size: 0.85rem; color: var(--muted); }
+    .chevron { color: var(--muted); transition: transform 0.2s; font-size: 0.8rem; }
+    .endpoint.open .chevron { transform: rotate(90deg); }
+    .endpoint-body {
+      display: none; border-top: 1px solid var(--border);
+      padding: 20px;
+    }
+    .endpoint.open .endpoint-body { display: block; }
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+    .tab {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; padding: 6px 14px; border-radius: 6px;
+      cursor: pointer; border: 1px solid var(--border);
+      color: var(--muted); background: transparent; transition: all 0.15s;
+    }
+    .tab.active { background: rgba(110,231,183,0.1); color: var(--accent); border-color: rgba(110,231,183,0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    /* Code */
+    pre {
+      background: #0d0d15;
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+      overflow-x: auto; font-size: 0.82rem;
+      font-family: 'Space Mono', monospace;
+      line-height: 1.7; color: #94a3b8;
+    }
+    .kw { color: var(--accent2); }
+    .str { color: var(--accent); }
+    .num { color: var(--accent4); }
+    .key { color: var(--accent3); }
+    /* Auth note */
+    .auth-note {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(251,146,60,0.07);
+      border: 1px solid rgba(251,146,60,0.2);
+      border-radius: 8px; padding: 12px 16px;
+      font-size: 0.85rem; color: #fb923c; margin-bottom: 16px;
+    }
+    /* Params table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
+    th {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--muted); padding: 8px 12px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid rgba(30,30,46,0.5); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    .param-name { font-family: 'Space Mono', monospace; color: var(--accent3); font-size: 0.82rem; }
+    .param-type { font-family: 'Space Mono', monospace; color: var(--accent2); font-size: 0.8rem; }
+    .required { color: var(--delete); font-size: 0.75rem; }
+    .optional { color: var(--muted); font-size: 0.75rem; }
+    /* Base URL box */
+    .base-url {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(110,231,183,0.05);
+      border: 1px solid rgba(110,231,183,0.15);
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 32px;
+    }
+    .base-url-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+    .base-url-val { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 0.95rem; }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 20px; }
+      .hero { padding: 40px 20px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">REST API v1.0</div>
+  <h1>Social Media API<br>Documentation</h1>
+  <p>A fully-featured RESTful API for a social media platform. Built with Node.js and Express — supports posts, users, comments, likes, and followers.</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">5</span><span class="stat-label">Resources</span></div>
+    <div class="stat"><span class="stat-num">20+</span><span class="stat-label">Endpoints</span></div>
+    <div class="stat"><span class="stat-num">JSON</span><span class="stat-label">& XML</span></div>
+    <div class="stat"><span class="stat-num">REST</span><span class="stat-label">Architecture</span></div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Getting Started</div>
+      <a class="sidebar-link active" href="#overview">Overview</a>
+      <a class="sidebar-link" href="#auth">Authentication</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Resources</div>
+      <a class="sidebar-link" href="#users"><span class="resource-dot" style="background:#6ee7b7"></span>Users</a>
+      <a class="sidebar-link" href="#posts"><span class="resource-dot" style="background:#818cf8"></span>Posts</a>
+      <a class="sidebar-link" href="#comments"><span class="resource-dot" style="background:#f472b6"></span>Comments</a>
+      <a class="sidebar-link" href="#likes"><span class="resource-dot" style="background:#fb923c"></span>Likes</a>
+      <a class="sidebar-link" href="#followers"><span class="resource-dot" style="background:#38bdf8"></span>Followers</a>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- Overview -->
+    <section class="section" id="overview">
+      <h2 class="section-title">Overview</h2>
+      <p class="section-desc">All API responses return JSON by default. Pass <code>Accept: application/xml</code> for XML responses.</p>
+      <div class="base-url">
+        <span class="base-url-label">Base URL</span>
+        <span class="base-url-val">http://localhost:3000/api</span>
+      </div>
+    </section>
+
+    <!-- Auth -->
+    <section class="section" id="auth">
+      <h2 class="section-title">Authentication</h2>
+      <p class="section-desc">Private routes require a user ID passed as a header to simulate authentication.</p>
+      <pre><span class="kw">Header:</span> <span class="str">X-User-Id: 1</span></pre>
+    </section>
+
+    <!-- USERS -->
+    <section class="section" id="users">
+      <h2 class="section-title">Users</h2>
+      <p class="section-desc">Manage user accounts — list, retrieve, create, update, and delete.</p>
+
+      <!-- GET /api/users -->
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <span class="endpoint-path">/api/users</span>
+          <span class="endpoint-desc">List all users</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab(event,'params')">Params</button>
+            <button class="tab" onclick="switchTab(event,'response')">Response</button>
+          </div>
+          <div class="tab-content active" data-tab="params">
+            <table><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+              <tr><td class="param-name">page</td><td class="param-type">Number</td><td class="optional">Optional</td><td>Page number (default: 1)</td></tr>
+              <tr><td class="param-name">limit</td><td class="param-type">Number</td><td class="optional">Optional</td><td>Results per page (default: 10)</td></tr>
+            </table>
+          </div>
+          <div class="tab-content" data-tab="response">
+<pre>{
+  <span class="key">"success"</span>: <span class="kw">true</span>,
+  <span class="key">"count"</span>: <span class="num">3</span>,
+  <span class="key">"page"</span>: <span class="num">1</span>,
+  <span class="key">"total_pages"</span>: <span class="num">1</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="str">"1"</span>,
+      <span class="key">"username"</span>: <span class="str">"traveler"</span>,
+      <span class="key">"full_name"</span>: <span class="str">"Karma"</span>,
+      <span class="key">"bio"</span>: <span class="str">"Travel photographer"</span>,
+      <span class="key">"created_at"</span>: <span class="str">"2023-01-15"</span>
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- GET /api/users/:id -->
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header">
+          <span class="method method-get">GET</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="endpoint-desc">Get a user by ID</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="tabs"><button class="tab active" onclick="switchTab(event,'params')">Params</button><button class="tab" onclick="switchTab(event,'response')">Response</button></div>
+          <div class="tab-content active" data-tab="params">
+            <table><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+              <tr><td class="param-name">id</td><td class="param-type">String</td><td class="required">Required</td><td>User ID (URL param)</td></tr>
+            </table>
+          </div>
+          <div class="tab-content" data-tab="response">
+<pre>{ <span class="key">"success"</span>: <span class="kw">true</span>, <span class="key">"data"</span>: { <span class="key">"id"</span>: <span class="str">"1"</span>, <span class="key">"username"</span>: <span class="str">"traveler"</span>, ... } }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST /api/users -->
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header">
+          <span class="method method-post">POST</span>
+          <span class="endpoint-path">/api/users</span>
+          <span class="endpoint-desc">Create a new user</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="tabs"><button class="tab active" onclick="switchTab(event,'body')">Body</button><button class="tab" onclick="switchTab(event,'response')">Response</button></div>
+          <div class="tab-content active" data-tab="body">
+<pre>{
+  <span class="key">"username"</span>: <span class="str">"new_traveler"</span>,   <span class="kw">// required</span>
+  <span class="key">"email"</span>:    <span class="str">"new@example.com"</span>, <span class="kw">// required</span>
+  <span class="key">"full_name"</span>: <span class="str">"New Traveler"</span>,
+  <span class="key">"bio"</span>:      <span class="str">"Adventure seeker"</span>
+}</pre>
+          </div>
+          <div class="tab-content" data-tab="response">
+<pre>Status: <span class="num">201</span> Created
+{ <span class="key">"success"</span>: <span class="kw">true</span>, <span class="key">"data"</span>: { <span class="key">"id"</span>: <span class="str">"4"</span>, <span class="key">"username"</span>: <span class="str">"new_traveler"</span>, ... } }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUT /api/users/:id -->
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header">
+          <span class="method method-put">PUT</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="endpoint-desc">Update a user</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 This route simulates authentication (no header required for users).</div>
+          <div class="tabs"><button class="tab active" onclick="switchTab(event,'body')">Body</button></div>
+          <div class="tab-content active" data-tab="body">
+<pre>{ <span class="key">"bio"</span>: <span class="str">"Updated bio"</span>, <span class="key">"full_name"</span>: <span class="str">"Updated Name"</span> }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELETE /api/users/:id -->
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header">
+          <span class="method method-delete">DELETE</span>
+          <span class="endpoint-path">/api/users/:id</span>
+          <span class="endpoint-desc">Delete a user</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="endpoint-body">
+          <pre>Status: <span class="num">200</span> OK — { <span class="key">"success"</span>: <span class="kw">true</span>, <span class="key">"data"</span>: {} }</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- POSTS -->
+    <section class="section" id="posts">
+      <h2 class="section-title">Posts</h2>
+      <p class="section-desc">Create and manage photo posts. Private write routes require <code>X-User-Id</code> header.</p>
+
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/posts</span><span class="endpoint-desc">List all posts (paginated)</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Query params: <span class="str">page</span>, <span class="str">limit</span> — Returns posts enriched with author user data.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/posts/:id</span><span class="endpoint-desc">Get a single post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns post enriched with author user data.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts</span><span class="endpoint-desc">Create a new post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires header: <code>X-User-Id: &lt;userId&gt;</code></div>
+<pre>{ <span class="key">"caption"</span>: <span class="str">"My new post!"</span>, <span class="key">"image"</span>: <span class="str">"https://example.com/photo.jpg"</span> }</pre>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-put">PUT</span><span class="endpoint-path">/api/posts/:id</span><span class="endpoint-desc">Update a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Must own the post.</div>
+          <pre>{ <span class="key">"caption"</span>: <span class="str">"Updated caption"</span> }</pre>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/posts/:id</span><span class="endpoint-desc">Delete a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Must own the post.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMENTS -->
+    <section class="section" id="comments">
+      <h2 class="section-title">Comments</h2>
+      <p class="section-desc">Nested under posts. Comments are retrieved and created via the post context.</p>
+
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/posts/:postId/comments</span><span class="endpoint-desc">Get all comments for a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns list of comments with author user info.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/comments/:id</span><span class="endpoint-desc">Get a single comment</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns single comment by ID.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts/:postId/comments</span><span class="endpoint-desc">Add a comment</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header.</div>
+          <pre>{ <span class="key">"text"</span>: <span class="str">"Great photo!"</span> }</pre>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-put">PUT</span><span class="endpoint-path">/api/comments/:id</span><span class="endpoint-desc">Update a comment</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Must own the comment.</div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/comments/:id</span><span class="endpoint-desc">Delete a comment</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Must own the comment.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIKES -->
+    <section class="section" id="likes">
+      <h2 class="section-title">Likes</h2>
+      <p class="section-desc">Like and unlike posts. Nested under the post resource.</p>
+
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/posts/:postId/likes</span><span class="endpoint-desc">Get all likes for a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns list of likes with count.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/posts/:postId/likes</span><span class="endpoint-desc">Like a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Cannot like twice.</div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/posts/:postId/likes</span><span class="endpoint-desc">Unlike a post</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOLLOWERS -->
+    <section class="section" id="followers">
+      <h2 class="section-title">Followers</h2>
+      <p class="section-desc">Follow/unfollow users and retrieve follower/following lists.</p>
+
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/users/:userId/followers</span><span class="endpoint-desc">Get a user's followers</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns list of users who follow <span class="str">:userId</span>.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-get">GET</span><span class="endpoint-path">/api/users/:userId/following</span><span class="endpoint-desc">Get who a user follows</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body"><pre>Returns list of users that <span class="str">:userId</span> is following.</pre></div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-post">POST</span><span class="endpoint-path">/api/users/:userId/followers</span><span class="endpoint-desc">Follow a user</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header. Cannot follow yourself.</div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="toggleEndpoint(this)">
+        <div class="endpoint-header"><span class="method method-delete">DELETE</span><span class="endpoint-path">/api/users/:userId/followers</span><span class="endpoint-desc">Unfollow a user</span><span class="chevron">▶</span></div>
+        <div class="endpoint-body">
+          <div class="auth-note">🔒 Requires <code>X-User-Id</code> header.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function toggleEndpoint(el) {
+  // Don't toggle if clicking a tab button
+  if (event.target.classList.contains('tab')) return;
+  el.classList.toggle('open');
+}
+function switchTab(e, tabName) {
+  e.stopPropagation();
+  const body = e.target.closest('.endpoint-body');
+  body.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  body.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  body.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+// Sidebar active link
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
