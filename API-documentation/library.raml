@@ -1,0 +1,99 @@
+#%RAML 1.0
+title: Book Library API
+version: v1
+baseUri: http://localhost:3000/api
+
+types:
+  Book:
+    type: object
+    properties:
+      id: integer
+      title: string
+      author: string
+      year: integer
+
+/books:
+  get:
+    description: Get all books
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [
+                {
+                  "id": 1,
+                  "title": "Atomic Habits",
+                  "author": "James Clear",
+                  "year": 2018
+                }
+              ]
+
+  post:
+    description: Add a new book
+    body:
+      application/json:
+        example:
+          {
+            "title": "Deep Work",
+            "author": "Cal Newport",
+            "year": 2016
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              {
+                "message": "Book added successfully"
+              }
+
+/books/{id}:
+  uriParameters:
+    id:
+      type: integer
+      description: Book ID
+
+  get:
+    description: Get a book by ID
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "id": 1,
+                "title": "Atomic Habits",
+                "author": "James Clear",
+                "year": 2018
+              }
+
+  put:
+    description: Update a book
+    body:
+      application/json:
+        example:
+          {
+            "title": "Updated Title",
+            "author": "Updated Author",
+            "year": 2020
+          }
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "message": "Book updated successfully"
+              }
+
+  delete:
+    description: Delete a book
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "message": "Book deleted successfully"
+              }
